@@ -16,6 +16,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -40,11 +41,12 @@ namespace DuploAuth
             .AddEntityFrameworkStores<ApplicationDbContext>();
 
             bool isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
-            var path = "./file.db";
+            var path = "./db/file.db";
             if (isLinux)
             {
-                path = "/app/file.db";
+                path = "/app/db/file.db";
             }
+            Debug.WriteLine($"isLinus: {isLinux}");
 
             services.AddDbContext<ApplicationDbContext>(options =>
                options.UseSqlite("Filename=" + path));

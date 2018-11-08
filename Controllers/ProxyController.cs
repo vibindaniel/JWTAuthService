@@ -67,12 +67,33 @@ namespace DuploAuth.Controllers
                 }
                 catch (JsonReaderException)
                 {
-                    return new OkObjectResult(JArray.Parse(properMessage));
+                    try
+                    {
+                        return new OkObjectResult(JArray.Parse(properMessage));
+                    }
+                    catch (JsonReaderException)
+                    {
+                        return Ok(properMessage);
+                    }
                 }
             }
             else
             {
-                return BadRequest(JObject.Parse(properMessage));
+                try
+                {
+                    return BadRequest(JObject.Parse(properMessage));
+                }
+                catch (JsonReaderException)
+                {
+                    try
+                    {
+                        return BadRequest(JArray.Parse(properMessage));
+                    }
+                    catch (JsonReaderException)
+                    {
+                        return BadRequest(properMessage);
+                    }
+                }
             }
         }
 
