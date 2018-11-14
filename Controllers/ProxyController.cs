@@ -9,7 +9,6 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -52,48 +51,17 @@ namespace DuploAuth.Controllers
             var redirectUrl = regex.Replace(url, proxy, 1);
 
             string proxyMessage = string.Empty;
-            Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             var responseMessage = await Client.GetAsync(redirectUrl + Request.QueryString.Value);
 
             var properMessage = await ReadContentAsString(responseMessage);
-            Debug.WriteLine(responseMessage);
-            Debug.WriteLine(properMessage);
-            if (responseMessage.IsSuccessStatusCode)
+            try
             {
-                try
-                {
-                    return new OkObjectResult(JObject.Parse(properMessage));
-                }
-                catch (JsonReaderException)
-                {
-                    try
-                    {
-                        return new OkObjectResult(JArray.Parse(properMessage));
-                    }
-                    catch (JsonReaderException)
-                    {
-                        return Ok(properMessage);
-                    }
-                }
+                return StatusCode((int)responseMessage.StatusCode, JToken.Parse(properMessage));
             }
-            else
+            catch (JsonReaderException)
             {
-                try
-                {
-                    return BadRequest(JObject.Parse(properMessage));
-                }
-                catch (JsonReaderException)
-                {
-                    try
-                    {
-                        return BadRequest(JArray.Parse(properMessage));
-                    }
-                    catch (JsonReaderException)
-                    {
-                        return BadRequest(properMessage);
-                    }
-                }
+                return StatusCode((int)responseMessage.StatusCode, properMessage);
             }
         }
 
